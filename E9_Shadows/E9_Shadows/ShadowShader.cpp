@@ -94,7 +94,7 @@ void ShadowShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilena
 }
 
 
-void ShadowShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX &worldMatrix, const XMMATRIX &viewMatrix, const XMMATRIX &projectionMatrix, ID3D11ShaderResourceView* texture, ID3D11ShaderResourceView*depthMap, Light* light)
+void ShadowShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX &worldMatrix, const XMMATRIX &viewMatrix, const XMMATRIX &projectionMatrix, ID3D11ShaderResourceView* texture, ID3D11ShaderResourceView*depthMap, Light* lights[])
 {
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	MatrixBufferType* dataPtr;
@@ -104,9 +104,9 @@ void ShadowShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const
 	XMMATRIX tworld = XMMatrixTranspose(worldMatrix);
 	XMMATRIX tview = XMMatrixTranspose(viewMatrix);
 	XMMATRIX tproj = XMMatrixTranspose(projectionMatrix);
-	XMMATRIX tLightViewMatrix = XMMatrixTranspose(light->getViewMatrix());
-	//XMMATRIX tLightProjectionMatrix = XMMatrixTranspose(light->getOrthoMatrix());
-	XMMATRIX tLightProjectionMatrix = XMMatrixTranspose(light->getProjectionMatrix());
+	XMMATRIX tLightViewMatrix = XMMatrixTranspose(lights[0]->getViewMatrix());
+	XMMATRIX tLightProjectionMatrix = XMMatrixTranspose(lights[0]->getOrthoMatrix());
+	//XMMATRIX tLightProjectionMatrix = XMMatrixTranspose(light->getProjectionMatrix());
 	
 	// Lock the constant buffer so it can be written to.
 	deviceContext->Map(matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
@@ -121,12 +121,26 @@ void ShadowShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const
 
 	//Additional
 	// Send light data to pixel shader
-	deviceContext->Map(lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	/*deviceContext->Map(lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	lightPtr = (LightBufferType*)mappedResource.pData;
 	lightPtr->ambient = light->getAmbientColour();
 	lightPtr->diffuse = light->getDiffuseColour();
 	lightPtr->direction = light->getDirection();
 	lightPtr->padding = 0.f;
+	deviceContext->Unmap(lightBuffer, 0);
+	deviceContext->PSSetConstantBuffers(0, 1, &lightBuffer);*/
+
+	deviceContext->Map(lightBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	lightPtr = (LightBufferType*)mappedResource.pData;
+
+	for (int i = 0; i < 2; i++)
+	{
+		lightPtr->lsLights[i].ambient = lights[i]->getAmbientColour();
+		lightPtr->lsLights[i].diffuse = lights[i]->getDiffuseColour();
+		lightPtr->lsLights[i].direction = lights[i]->getDirection();
+		lightPtr->lsLights[i].padding = 0.0f;
+	}
+
 	deviceContext->Unmap(lightBuffer, 0);
 	deviceContext->PSSetConstantBuffers(0, 1, &lightBuffer);
 

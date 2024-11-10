@@ -31,8 +31,9 @@ private:
 	OrthoMesh* orthoMesh;
 	SphereMesh* sphereMesh;
 	SphereMesh* lightSphereMesh;
+	SphereMesh* light2SphereMesh;
 
-	Light* light;
+	Light* lights[2];
 	AModel* model;
 	ShadowShader* shadowShader;
 	DepthShader* depthShader;
@@ -53,6 +54,14 @@ private:
 	float lightDirX;
 	float lightDirY;
 	float lightDirZ;
+
+	float lightPosX2;
+	float lightPosY2;
+	float lightPosZ2;
+				   
+	float lightDirX2;
+	float lightDirY2;
+	float lightDirZ2;
 };
 
 #endif
