@@ -40,6 +40,9 @@ private:
 
 	float screenW;
 	float screenY;
+
+	float sphereX;
+	bool sphereDir;
 };
 
 #endif

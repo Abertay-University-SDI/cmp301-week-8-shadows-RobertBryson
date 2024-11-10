@@ -44,6 +44,8 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	light->setPosition(0.f, 0.f, -10.f);
 	light->generateOrthoMatrix((float)sceneWidth, (float)sceneHeight, 0.1f, 100.f);
 
+	sphereX = 0;
+	sphereDir = true;
 }
 
 App1::~App1()
@@ -59,7 +61,6 @@ App1::~App1()
 bool App1::frame()
 {
 	bool result;
-
 	result = BaseApplication::frame();
 	if (!result)
 	{
@@ -78,6 +79,22 @@ bool App1::frame()
 
 bool App1::render()
 {
+	if (sphereDir == true)
+	{
+		sphereX += 0.05;
+		if (sphereX > 20)
+		{
+			sphereDir = false;
+		}
+	}
+	else
+	{
+		sphereX -= 0.05;
+		if (sphereX < -20)
+		{
+			sphereDir = true;
+		}
+	}
 
 	// Perform depth pass
 	depthPass();
@@ -114,7 +131,7 @@ void App1::depthPass()
 	depthShader->render(renderer->getDeviceContext(), model->getIndexCount());
 
 	// Render sphere
-	worldMatrix = XMMatrixTranslation(30.0f, 5.0f, 20.0f);
+	worldMatrix = XMMatrixTranslation(sphereX, 5.0f, 20.0f);
 	sphereMesh->sendData(renderer->getDeviceContext());
 	depthShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, lightViewMatrix, lightProjectionMatrix);
 	depthShader->render(renderer->getDeviceContext(), sphereMesh->getIndexCount());
@@ -152,7 +169,7 @@ void App1::finalPass()
 	shadowShader->render(renderer->getDeviceContext(), model->getIndexCount());
 	
 	//Render Sphere
-	worldMatrix = XMMatrixTranslation(30.0f, 5.0f, 20.0f);
+	worldMatrix = XMMatrixTranslation(sphereX, 5.0f, 20.0f);
 	sphereMesh->sendData(renderer->getDeviceContext());
 	shadowShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, textureMgr->getTexture(L"brick"), shadowMap->getDepthMapSRV(), light);
 	shadowShader->render(renderer->getDeviceContext(), sphereMesh->getIndexCount());
