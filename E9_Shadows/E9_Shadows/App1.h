@@ -26,7 +26,9 @@ protected:
 
 private:
 	TextureShader* textureShader;
+	TextureShader* depthTexture;
 	PlaneMesh* mesh;
+	OrthoMesh* orthoMesh;
 
 	Light* light;
 	AModel* model;
@@ -34,6 +36,9 @@ private:
 	DepthShader* depthShader;
 
 	ShadowMap* shadowMap;
+
+	float screenW;
+	float screenY;
 };
 
 #endif
