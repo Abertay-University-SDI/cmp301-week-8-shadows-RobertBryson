@@ -44,6 +44,8 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	light->setDirection(0.0f, -0.7f, 0.7f);
 	light->setPosition(0.f, 0.f, -10.f);
 	light->generateOrthoMatrix((float)sceneWidth, (float)sceneHeight, 0.1f, 100.f);
+	light->generateProjectionMatrix(0.1f, 100.f);
+
 
 	sphereX = 0;
 	sphereDir = true;
@@ -121,7 +123,7 @@ void App1::depthPass()
 	// get the world, view, and projection matrices from the camera and d3d objects.
 	light->generateViewMatrix();
 	XMMATRIX lightViewMatrix = light->getViewMatrix();
-	XMMATRIX lightProjectionMatrix = light->getOrthoMatrix();
+	XMMATRIX lightProjectionMatrix = light->getProjectionMatrix();
 	XMMATRIX worldMatrix = renderer->getWorldMatrix();
 
 	worldMatrix = XMMatrixTranslation(-50.f, 0.f, -10.f);
@@ -164,8 +166,7 @@ void App1::finalPass()
 	worldMatrix = XMMatrixTranslation(-50.f, 0.f, -10.f);
 	// Render floor
 	mesh->sendData(renderer->getDeviceContext());
-	shadowShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, 
-	textureMgr->getTexture(L"brick"), shadowMap->getDepthMapSRV(), light);
+	shadowShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, textureMgr->getTexture(L"brick"), shadowMap->getDepthMapSRV(), light);
 	shadowShader->render(renderer->getDeviceContext(), mesh->getIndexCount());
 
 	// Render model
@@ -188,7 +189,7 @@ void App1::finalPass()
 	scaleMatrix = XMMatrixScaling(0.5f, 0.5f, 0.5f);
 	worldMatrix = XMMatrixMultiply(worldMatrix, scaleMatrix);
 	sphereMesh->sendData(renderer->getDeviceContext());
-	shadowShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, textureMgr->getTexture(L"brick"), shadowMap->getDepthMapSRV(), light);
+	shadowShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, nullptr, shadowMap->getDepthMapSRV(), light);
 	shadowShader->render(renderer->getDeviceContext(), sphereMesh->getIndexCount());
 
 	// RENDER THE RENDER TEXTURE SCENE
