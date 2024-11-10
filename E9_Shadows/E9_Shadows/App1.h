@@ -8,6 +8,7 @@
 #include "ShadowShader.h"
 #include "DepthShader.h"
 
+
 class App1 : public BaseApplication
 {
 public:
@@ -38,7 +39,8 @@ private:
 	ShadowShader* shadowShader;
 	DepthShader* depthShader;
 
-	ShadowMap* shadowMap;
+	ShadowMap* shadowMap[2];
+	ID3D11ShaderResourceView* depthMap[2];
 
 	float screenW;
 	float screenY;
@@ -48,20 +50,23 @@ private:
 
 
 	float lightPosX;
-	float lightPosY;
-	float lightPosZ;
+	float lightPosY = 10;
+	float lightPosZ = -15;
 				   
 	float lightDirX;
-	float lightDirY;
-	float lightDirZ;
+	float lightDirY = -0.15;
+	float lightDirZ = 0.25;
 
 	float lightPosX2;
-	float lightPosY2;
-	float lightPosZ2;
+	float lightPosY2 = 10;
+	float lightPosZ2 = 15;
 				   
 	float lightDirX2;
-	float lightDirY2;
-	float lightDirZ2;
+	float lightDirY2 = -0.15;
+	float lightDirZ2 = -0.25;
+
+	int sceneWidth = 100;
+	int sceneHeight = 100;
 };
 
 #endif
