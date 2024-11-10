@@ -29,6 +29,7 @@ private:
 	TextureShader* depthTexture;
 	PlaneMesh* mesh;
 	OrthoMesh* orthoMesh;
+	SphereMesh* sphereMesh;
 
 	Light* light;
 	AModel* model;
