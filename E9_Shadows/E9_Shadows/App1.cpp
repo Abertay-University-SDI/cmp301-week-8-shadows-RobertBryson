@@ -20,6 +20,7 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	model = new AModel(renderer->getDevice(), "res/teapot.obj"); 
 	orthoMesh = new OrthoMesh(renderer->getDevice(), renderer->getDeviceContext(), screenWidth / 4, screenHeight / 4, -screenWidth / 2.7, screenHeight / 2.7);
 	sphereMesh = new SphereMesh(renderer->getDevice(), renderer->getDeviceContext());
+	lightSphereMesh = new SphereMesh(renderer->getDevice(), renderer->getDeviceContext());
 
 	// initial shaders
 	textureShader = new TextureShader(renderer->getDevice(), hwnd);
@@ -79,6 +80,14 @@ bool App1::frame()
 
 bool App1::render()
 {
+	// update light position
+	light->setPosition(lightPosX, lightPosY, lightPosZ);
+	if (lightDirX == 0) { lightDirX = 0.0001; }
+	if (lightDirY == 0) { lightDirY = 0.0001; }
+	if (lightDirZ == 0) { lightDirZ = 0.0001; }
+	light->setDirection(lightDirX, lightDirY, lightDirZ);
+
+	//Move Sphere Mesh
 	if (sphereDir == true)
 	{
 		sphereX += 0.05;
@@ -174,6 +183,14 @@ void App1::finalPass()
 	shadowShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, textureMgr->getTexture(L"brick"), shadowMap->getDepthMapSRV(), light);
 	shadowShader->render(renderer->getDeviceContext(), sphereMesh->getIndexCount());
 
+	//Render Light Sphere
+	worldMatrix = XMMatrixTranslation(lightPosX, lightPosY, lightPosZ);
+	scaleMatrix = XMMatrixScaling(0.5f, 0.5f, 0.5f);
+	worldMatrix = XMMatrixMultiply(worldMatrix, scaleMatrix);
+	sphereMesh->sendData(renderer->getDeviceContext());
+	shadowShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, textureMgr->getTexture(L"brick"), shadowMap->getDepthMapSRV(), light);
+	shadowShader->render(renderer->getDeviceContext(), sphereMesh->getIndexCount());
+
 	// RENDER THE RENDER TEXTURE SCENE
 	// Requires 2D rendering and an ortho mesh.
 	renderer->setZBuffer(false);
@@ -202,6 +219,14 @@ void App1::gui()
 	// Build UI
 	ImGui::Text("FPS: %.2f", timer->getFPS());
 	ImGui::Checkbox("Wireframe mode", &wireframeToggle);
+
+	//Light Controls
+	ImGui::SliderFloat("X", &lightPosX, -100, 100);
+	ImGui::SliderFloat("Y", &lightPosY, -100, 100);
+	ImGui::SliderFloat("Z", &lightPosZ, -100, 100);
+	ImGui::SliderFloat("dirX", &lightDirX, -1, 1);
+	ImGui::SliderFloat("dirY", &lightDirY, -1, 1);
+	ImGui::SliderFloat("dirZ", &lightDirZ, -1, 1);
 
 	// Render UI
 	ImGui::Render();

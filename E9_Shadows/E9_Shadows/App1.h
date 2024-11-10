@@ -30,6 +30,7 @@ private:
 	PlaneMesh* mesh;
 	OrthoMesh* orthoMesh;
 	SphereMesh* sphereMesh;
+	SphereMesh* lightSphereMesh;
 
 	Light* light;
 	AModel* model;
@@ -43,6 +44,15 @@ private:
 
 	float sphereX;
 	bool sphereDir;
+
+
+	float lightPosX = 0;
+	float lightPosY = 0;
+	float lightPosZ = 0;
+				   
+	float lightDirX = 0;
+	float lightDirY = 0;
+	float lightDirZ = 0;
 };
 
 #endif
