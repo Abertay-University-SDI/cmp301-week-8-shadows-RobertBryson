@@ -34,14 +34,12 @@ OutputType main(InputType input)
     output.position = mul(output.position, projectionMatrix);
     
 	// Calculate the position of the vertice as viewed by the light source.
-    output.lightViewPos[0] = mul(input.position, worldMatrix);
-    output.lightViewPos[0] = mul(output.lightViewPos[0], lightViewMatrix[0]);
-    output.lightViewPos[0] = mul(output.lightViewPos[0], lightProjectionMatrix[0]);
-    
-    
-    output.lightViewPos[1] = mul(input.position, worldMatrix);
-    output.lightViewPos[1] = mul(output.lightViewPos[1], lightViewMatrix[1]);
-    output.lightViewPos[1] = mul(output.lightViewPos[1], lightProjectionMatrix[1]);
+    for (int i = 0; i < 2; i++)
+    {
+        output.lightViewPos[i] = mul(input.position, worldMatrix);
+        output.lightViewPos[i] = mul(output.lightViewPos[i], lightViewMatrix[i]);
+        output.lightViewPos[i] = mul(output.lightViewPos[i], lightProjectionMatrix[i]);
+    }
 
     output.tex = input.tex;
     output.normal = mul(input.normal, (float3x3)worldMatrix);
