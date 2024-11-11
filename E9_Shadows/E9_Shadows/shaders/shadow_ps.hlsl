@@ -76,8 +76,6 @@ float4 main(InputType input) : SV_TARGET
     float4 textureColour = shaderTexture.Sample(diffuseSampler, input.tex);
     float4 colourTot = float4(0.f, 0.f, 0.f, 1.f);
 
-	
-	
     for (int i = 0; i < 2; i++)
     {
         // Calculate the projected texture coordinates.
