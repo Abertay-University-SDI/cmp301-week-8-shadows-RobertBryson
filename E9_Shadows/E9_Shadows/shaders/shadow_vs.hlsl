@@ -24,21 +24,35 @@ struct OutputType
 };
 
 
+float4 calcPosDef(float4 inPos)
+{
+    float4 position =  mul(inPos, worldMatrix);
+    position = mul(position, viewMatrix);
+    position = mul(position, projectionMatrix);
+    
+    return position;
+}
+
+float4 calcViewPosDef(float4 inPos, int i)
+{
+    float4 position = mul(inPos, worldMatrix);
+    position = mul(position, lightViewMatrix[i]);
+    position = mul(position, lightProjectionMatrix[i]);
+    
+    return position;
+}
+
 OutputType main(InputType input)
 {
     OutputType output;
 
 	// Calculate the position of the vertex against the world, view, and projection matrices.
-    output.position = mul(input.position, worldMatrix);
-    output.position = mul(output.position, viewMatrix);
-    output.position = mul(output.position, projectionMatrix);
+    output.position = calcPosDef(input.position);
     
 	// Calculate the position of the vertice as viewed by the light source.
     for (int i = 0; i < 2; i++)
     {
-        output.lightViewPos[i] = mul(input.position, worldMatrix);
-        output.lightViewPos[i] = mul(output.lightViewPos[i], lightViewMatrix[i]);
-        output.lightViewPos[i] = mul(output.lightViewPos[i], lightProjectionMatrix[i]);
+        output.lightViewPos[i] = calcViewPosDef(input.position, i);
     }
 
     output.tex = input.tex;

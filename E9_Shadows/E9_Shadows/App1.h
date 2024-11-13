@@ -7,6 +7,7 @@
 #include "TextureShader.h"
 #include "ShadowShader.h"
 #include "DepthShader.h"
+#include "WaveManipulationShader.h"
 
 
 class App1 : public BaseApplication
@@ -67,6 +68,16 @@ private:
 
 	int sceneWidth = 100;
 	int sceneHeight = 100;
+
+	//wave
+	WaveManipulationShader* waveShader;
+
+	Timer* timer;
+
+	float time = 0;
+	float amplitude = 0.75;
+	float waveLength = 0.5;
+	float speed = 1.5;
 };
 
 #endif

@@ -21,6 +21,11 @@ DepthShader::~DepthShader()
 		layout->Release();
 		layout = 0;
 	}
+	if (timerBuffer)
+	{
+		timerBuffer->Release();
+		timerBuffer = 0;
+	}
 
 	//Release base shader components
 	BaseShader::~BaseShader();
@@ -43,9 +48,18 @@ void DepthShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilenam
 	matrixBufferDesc.StructureByteStride = 0;
 	renderer->CreateBuffer(&matrixBufferDesc, NULL, &matrixBuffer);
 
+	//wave
+	D3D11_BUFFER_DESC timerBufferDesc;
+	timerBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	timerBufferDesc.ByteWidth = sizeof(TimerBufferType);
+	timerBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	timerBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	timerBufferDesc.MiscFlags = 0;
+	timerBufferDesc.StructureByteStride = 0;
+	renderer->CreateBuffer(&timerBufferDesc, NULL, &timerBuffer);
 }
 
-void DepthShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX &worldMatrix, const XMMATRIX &viewMatrix, const XMMATRIX &projectionMatrix)
+void DepthShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX &worldMatrix, const XMMATRIX &viewMatrix, const XMMATRIX &projectionMatrix, float type, float tTime, float amp, float len, float spe)
 {
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	MatrixBufferType* dataPtr;
@@ -63,4 +77,16 @@ void DepthShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const 
 	dataPtr->projection = tproj;
 	deviceContext->Unmap(matrixBuffer, 0);
 	deviceContext->VSSetConstantBuffers(0, 1, &matrixBuffer);
+
+	TimerBufferType* timerPtr;
+	deviceContext->Map(timerBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	timerPtr = (TimerBufferType*)mappedResource.pData;
+	timerPtr->type = type;
+	timerPtr->padding = XMFLOAT3(0, 0, 0);
+	timerPtr->time = tTime;
+	timerPtr->amplitude = amp;
+	timerPtr->frequency = len;
+	timerPtr->speed = spe;
+	deviceContext->Unmap(timerBuffer, 0);
+	deviceContext->VSSetConstantBuffers(1, 1, &timerBuffer);
 }
