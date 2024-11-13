@@ -1,3 +1,7 @@
+
+Texture2D heightmap : register(t0);
+SamplerState samplerState : register(s0);
+
 cbuffer MatrixBuffer : register(b0)
 {
     matrix worldMatrix;
@@ -51,10 +55,27 @@ float4 calcPosWave(float4 inPos)
     return position;
 }
 
+float4 calPosHeightMap(float4 inPos, float2 uv)
+{
+    inPos.y = (heightmap.SampleLevel(samplerState, uv, 0).r) * amplitude * 15;
+	
+	// Calculate the position of the vertex against the world, view, and projection matrices.
+    float4 position = mul(inPos, worldMatrix);
+    position = mul(position, viewMatrix);
+    position = mul(position, projectionMatrix);
+
+	// Store the texture coordinates for the pixel shader.
+    //output.tex = input.tex;
+    
+    return position;
+}
+
 OutputType main(InputType input)
 {
     OutputType output;
-
+    
+    float2 uv = input.tex;
+    
     switch (type)
     {
         case 0: //Flat
@@ -62,6 +83,9 @@ OutputType main(InputType input)
             break;
         case 1: //Wave
             output.position = calcPosWave(input.position);
+            break;
+        case 2:
+            output.position = calPosHeightMap(input.position, uv);
             break;
         
         default:

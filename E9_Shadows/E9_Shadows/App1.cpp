@@ -16,7 +16,9 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 
 	// Create Mesh object and shader object
 	textureMgr->loadTexture(L"brick", L"res/brick1.dds");
+	textureMgr->loadTexture(L"heightMap", L"res/height.png");
 	mesh = new PlaneMesh(renderer->getDevice(), renderer->getDeviceContext());
+	height = new PlaneMesh(renderer->getDevice(), renderer->getDeviceContext());
 	model = new AModel(renderer->getDevice(), "res/teapot.obj"); 
 	orthoMesh = new OrthoMesh(renderer->getDevice(), renderer->getDeviceContext(), screenWidth / 4, screenHeight / 4, -screenWidth / 2.7, screenHeight / 2.7);
 	sphereMesh = new SphereMesh(renderer->getDevice(), renderer->getDeviceContext());
@@ -28,6 +30,7 @@ void App1::init(HINSTANCE hinstance, HWND hwnd, int screenWidth, int screenHeigh
 	depthTexture = new TextureShader(renderer->getDevice(), hwnd);
 	depthShader = new DepthShader(renderer->getDevice(), hwnd);
 	shadowShader = new ShadowShader(renderer->getDevice(), hwnd);
+	heightShader = new HeightShader(renderer->getDevice(), hwnd);
 
 
 	// Variables for defining shadow map
@@ -163,9 +166,15 @@ void App1::depthPass()
 		//depthShader->render(renderer->getDeviceContext(), mesh->getIndexCount());
 
 		// Render wave
+		//mesh->sendData(renderer->getDeviceContext());
+		//time += timer->getTime();
+		//depthShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, lightViewMatrix, lightProjectionMatrix, nullptr, 1, time, amplitude, waveLength, speed);
+		//depthShader->render(renderer->getDeviceContext(), mesh->getIndexCount());
+
+		// Render height
 		mesh->sendData(renderer->getDeviceContext());
 		time += timer->getTime();
-		depthShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, lightViewMatrix, lightProjectionMatrix, 1, time, amplitude, waveLength, speed);
+		depthShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, lightViewMatrix, lightProjectionMatrix, textureMgr->getTexture(L"heightMap"), 2, time, amplitude, waveLength, speed);
 		depthShader->render(renderer->getDeviceContext(), mesh->getIndexCount());
 
 		worldMatrix = renderer->getWorldMatrix();
@@ -174,13 +183,13 @@ void App1::depthPass()
 		worldMatrix = XMMatrixMultiply(worldMatrix, scaleMatrix);
 		// Render model
 		model->sendData(renderer->getDeviceContext());
-		depthShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, lightViewMatrix, lightProjectionMatrix, 0, 0, 0, 0, 0);
+		depthShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, lightViewMatrix, lightProjectionMatrix, nullptr, 0, 0, 0, 0, 0);
 		depthShader->render(renderer->getDeviceContext(), model->getIndexCount());
 
 		// Render sphere
 		worldMatrix = XMMatrixTranslation(sphereX, 5.0f, 20.0f);
 		sphereMesh->sendData(renderer->getDeviceContext());
-		depthShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, lightViewMatrix, lightProjectionMatrix, 0, 0, 0, 0, 0);
+		depthShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, lightViewMatrix, lightProjectionMatrix, nullptr, 0, 0, 0, 0, 0);
 		depthShader->render(renderer->getDeviceContext(), sphereMesh->getIndexCount());
 
 		depthMap[i] = shadowMap[i]->getDepthMapSRV();
@@ -209,10 +218,16 @@ void App1::finalPass()
 	//shadowShader->render(renderer->getDeviceContext(), mesh->getIndexCount());
 
 	//Render Wave
-	mesh->sendData(renderer->getDeviceContext());
+	/*mesh->sendData(renderer->getDeviceContext());
 	time += timer->getTime();
 	waveShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, textureMgr->getTexture(L"brick"), depthMap, lights, time, amplitude, waveLength, speed);
-	waveShader->render(renderer->getDeviceContext(), mesh->getIndexCount());
+	waveShader->render(renderer->getDeviceContext(), mesh->getIndexCount());*/
+
+	//Render height
+	mesh->sendData(renderer->getDeviceContext());
+	time += timer->getTime();
+	heightShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, textureMgr->getTexture(L"heightMap"), depthMap, lights, amplitude);
+	heightShader->render(renderer->getDeviceContext(), mesh->getIndexCount());
 
 	// Render model
 	worldMatrix = renderer->getWorldMatrix();
@@ -280,7 +295,7 @@ void App1::gui()
 	ImGui::Checkbox("Wireframe mode", &wireframeToggle);
 
 	//Wave Controls
-	ImGui::SliderFloat("Amplitude", &amplitude, 0, 2);
+	ImGui::SliderFloat("Amplitude", &amplitude, 0, 10);
 	ImGui::SliderFloat("Wave Length", &waveLength, 0, 10);
 	ImGui::SliderFloat("Speed", &speed, 0, 10);
 

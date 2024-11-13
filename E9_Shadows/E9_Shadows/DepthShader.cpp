@@ -27,6 +27,13 @@ DepthShader::~DepthShader()
 		timerBuffer = 0;
 	}
 
+	// Release the sampler state.
+	if (sampleState)
+	{
+		sampleState->Release();
+		sampleState = 0;
+	}
+
 	//Release base shader components
 	BaseShader::~BaseShader();
 }
@@ -57,9 +64,23 @@ void DepthShader::initShader(const wchar_t* vsFilename, const wchar_t* psFilenam
 	timerBufferDesc.MiscFlags = 0;
 	timerBufferDesc.StructureByteStride = 0;
 	renderer->CreateBuffer(&timerBufferDesc, NULL, &timerBuffer);
+
+
+	D3D11_SAMPLER_DESC samplerDesc;
+	// Create a texture sampler state description.
+	samplerDesc.Filter = D3D11_FILTER_ANISOTROPIC;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.MipLODBias = 0.0f;
+	samplerDesc.MaxAnisotropy = 1;
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	samplerDesc.MinLOD = 0;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	renderer->CreateSamplerState(&samplerDesc, &sampleState);
 }
 
-void DepthShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX &worldMatrix, const XMMATRIX &viewMatrix, const XMMATRIX &projectionMatrix, float type, float tTime, float amp, float len, float spe)
+void DepthShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const XMMATRIX &worldMatrix, const XMMATRIX &viewMatrix, const XMMATRIX &projectionMatrix, ID3D11ShaderResourceView* texture, float type, float tTime, float amp, float len, float spe)
 {
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	MatrixBufferType* dataPtr;
@@ -89,4 +110,8 @@ void DepthShader::setShaderParameters(ID3D11DeviceContext* deviceContext, const 
 	timerPtr->speed = spe;
 	deviceContext->Unmap(timerBuffer, 0);
 	deviceContext->VSSetConstantBuffers(1, 1, &timerBuffer);
+
+	//set texture
+	deviceContext->VSSetShaderResources(0, 1, &texture);
+	deviceContext->VSSetSamplers(0, 1, &sampleState);
 }

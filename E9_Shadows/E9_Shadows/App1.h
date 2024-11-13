@@ -8,6 +8,7 @@
 #include "ShadowShader.h"
 #include "DepthShader.h"
 #include "WaveManipulationShader.h"
+#include "HeightShader.h"
 
 
 class App1 : public BaseApplication
@@ -29,7 +30,9 @@ protected:
 private:
 	TextureShader* textureShader;
 	TextureShader* depthTexture;
+	HeightShader* heightShader;
 	PlaneMesh* mesh;
+	PlaneMesh* height;
 	OrthoMesh* orthoMesh;
 	SphereMesh* sphereMesh;
 	SphereMesh* lightSphereMesh;
@@ -66,8 +69,8 @@ private:
 	float lightDirY2 = -0.15;
 	float lightDirZ2 = -0.25;
 
-	int sceneWidth = 100;
-	int sceneHeight = 100;
+	int sceneWidth = 200;
+	int sceneHeight = 200;
 
 	//wave
 	WaveManipulationShader* waveShader;
