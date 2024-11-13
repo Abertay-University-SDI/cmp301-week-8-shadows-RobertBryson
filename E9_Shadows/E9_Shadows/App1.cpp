@@ -204,15 +204,15 @@ void App1::finalPass()
 
 	worldMatrix = XMMatrixTranslation(-50.f, 0.f, -50.f);
 	// Render floor
-	mesh->sendData(renderer->getDeviceContext());
-	shadowShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, textureMgr->getTexture(L"brick"), depthMap, lights);
-	shadowShader->render(renderer->getDeviceContext(), mesh->getIndexCount());
-
-	////Render Wave
 	//mesh->sendData(renderer->getDeviceContext());
-	//time += timer->getTime();
-	//waveShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, textureMgr->getTexture(L"brick"), lights[0], time, amplitude, waveLength, speed);
-	//waveShader->render(renderer->getDeviceContext(), mesh->getIndexCount());
+	//shadowShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, textureMgr->getTexture(L"brick"), depthMap, lights);
+	//shadowShader->render(renderer->getDeviceContext(), mesh->getIndexCount());
+
+	//Render Wave
+	mesh->sendData(renderer->getDeviceContext());
+	time += timer->getTime();
+	waveShader->setShaderParameters(renderer->getDeviceContext(), worldMatrix, viewMatrix, projectionMatrix, textureMgr->getTexture(L"brick"), depthMap, lights, time, amplitude, waveLength, speed);
+	waveShader->render(renderer->getDeviceContext(), mesh->getIndexCount());
 
 	// Render model
 	worldMatrix = renderer->getWorldMatrix();

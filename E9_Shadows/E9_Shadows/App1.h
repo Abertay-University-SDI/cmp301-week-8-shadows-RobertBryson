@@ -50,11 +50,11 @@ private:
 	bool sphereDir;
 
 
-	float lightPosX;
+	float lightPosX = 15;
 	float lightPosY = 10;
 	float lightPosZ = -15;
 				   
-	float lightDirX;
+	float lightDirX = -0.6;
 	float lightDirY = -0.15;
 	float lightDirZ = 0.25;
 
@@ -76,8 +76,8 @@ private:
 
 	float time = 0;
 	float amplitude = 0.75;
-	float waveLength = 0.5;
-	float speed = 1.5;
+	float waveLength = 2;
+	float speed = 1;
 };
 
 #endif
